@@ -1,4 +1,4 @@
 fastmcp
 playwright
 python-frontmatter
-aiofiles 
+aiofiles
