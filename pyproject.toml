@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "docgenius-service"
-version = "2.0.0"
+version = "2.0.2"
 description = "一个AI驱动的动态文档生成服务，可将文本转换为设计精美的图片。"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -37,7 +37,9 @@ dependencies = [
 
 # 定义命令行入口点
 [project.scripts]
-# 当用户在终端运行 `docgenius` 时，系统会执行 `docgenius_service.main_service` 模块中的 `main` 函数
+# 主要命令入口，与包名相同，支持 uvx docgenius-service 直接运行
+docgenius-service = "docgenius_service.main_service:main"
+# 简化命令入口，向后兼容
 docgenius = "docgenius_service.main_service:main"
 
 [project.urls]
@@ -61,7 +63,14 @@ dev = [
 where = ["src"]
 
 [tool.setuptools.package-data]
-docgenius_service = ["py.typed"]
+docgenius_service = ["py.typed", "templates/*.md"]
+
+# 包含额外文件
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-dir]
+"" = "src"
 
 [tool.black]
 line-length = 88

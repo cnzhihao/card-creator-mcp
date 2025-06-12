@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: docgenius-service
-Version: 2.0.0
+Version: 2.0.2
 Summary: 一个AI驱动的动态文档生成服务，可将文本转换为设计精美的图片。
 Author-email: DocGenius Team <contact@docgenius.com>
 License: MIT

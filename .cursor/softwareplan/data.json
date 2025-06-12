@@ -59,6 +59,11 @@
       "id": "1749724676674",
       "description": "实现DocGenius项目重构：支持uvx启动的标准Python包",
       "createdAt": "2025-06-12T10:37:56.674Z"
+    },
+    "1749726092667": {
+      "id": "1749726092667",
+      "description": "将DocGenius项目发布到PyPI，实现uvx命令启动",
+      "createdAt": "2025-06-12T11:01:32.667Z"
     }
   },
   "plans": {
@@ -1895,6 +1900,57 @@
         }
       ],
       "updatedAt": "2025-06-12T10:46:43.147Z"
+    },
+    "1749726092667": {
+      "goalId": "1749726092667",
+      "todos": [
+        {
+          "id": "1749726097925",
+          "title": "安装打包和上传工具",
+          "description": "安装Python官方推荐的build和twine工具，用于打包项目和上传到PyPI。这些工具是发布流程的必需工具。",
+          "complexity": 2,
+          "isComplete": true,
+          "createdAt": "2025-06-12T11:01:37.925Z",
+          "updatedAt": "2025-06-12T11:02:07.830Z"
+        },
+        {
+          "id": "1749726101757",
+          "title": "验证pyproject.toml配置",
+          "description": "检查pyproject.toml文件的配置，确保项目名称、版本、依赖等信息正确无误，为PyPI发布做准备。",
+          "complexity": 3,
+          "isComplete": true,
+          "createdAt": "2025-06-12T11:01:41.757Z",
+          "updatedAt": "2025-06-12T11:02:28.728Z"
+        },
+        {
+          "id": "1749726105507",
+          "title": "构建发行包",
+          "description": "使用python -m build命令构建项目，生成wheel包和源码归档文件，准备上传到PyPI。",
+          "complexity": 3,
+          "isComplete": true,
+          "createdAt": "2025-06-12T11:01:45.507Z",
+          "updatedAt": "2025-06-12T11:06:09.656Z"
+        },
+        {
+          "id": "1749726110246",
+          "title": "上传到PyPI",
+          "description": "使用twine上传构建好的包到PyPI。需要使用API token进行安全认证，完成项目的公开发布。",
+          "complexity": 4,
+          "isComplete": true,
+          "createdAt": "2025-06-12T11:01:50.246Z",
+          "updatedAt": "2025-06-12T11:25:25.146Z"
+        },
+        {
+          "id": "1749726114957",
+          "title": "验证发布结果",
+          "description": "验证包是否成功发布到PyPI，测试pip install和uvx命令是否能正常安装和运行项目。",
+          "complexity": 3,
+          "isComplete": true,
+          "createdAt": "2025-06-12T11:01:54.957Z",
+          "updatedAt": "2025-06-12T11:25:29.528Z"
+        }
+      ],
+      "updatedAt": "2025-06-12T11:25:29.528Z"
     }
   }
 }

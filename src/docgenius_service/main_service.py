@@ -10,16 +10,37 @@ import aiofiles
 # 初始化 FastMCP 服务
 mcp = FastMCP("DocGeniusService")
 
-# 1. 修正路径：路径相对于当前文件，确保在任何位置运行都能找到模板
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-TEMPLATE_DIR_DEFAULT = PROJECT_ROOT / "templates"
+# 1. 智能路径解析：支持开发环境和安装环境
+def _find_templates_dir():
+    """
+    智能查找模板目录，支持开发环境和安装环境。
+    """
+    # 1. 优先使用环境变量
+    template_dir_env = os.getenv('DOCGENIUS_TEMPLATES_DIR')
+    if template_dir_env:
+        path = Path(template_dir_env).absolute()
+        if path.is_dir():
+            return path
+    
+    # 2. 开发环境：相对于文件的路径
+    dev_path = Path(__file__).parent.parent.parent / "templates"
+    if dev_path.is_dir():
+        return dev_path
+    
+    # 3. 安装环境：相对于包文件的路径
+    package_path = Path(__file__).parent / "templates"
+    if package_path.is_dir():
+        return package_path
+    
+    # 4. 尝试从当前工作目录查找
+    cwd_path = Path.cwd() / "templates"
+    if cwd_path.is_dir():
+        return cwd_path
+    
+    # 5. 如果都找不到，返回开发环境的默认路径（会在main函数中检查并报错）
+    return dev_path
 
-# 支持环境变量自定义模板目录，回退到默认路径
-template_dir_env = os.getenv('DOCGENIUS_TEMPLATES_DIR')
-if template_dir_env:
-    TEMPLATE_DIR = Path(template_dir_env).absolute()
-else:
-    TEMPLATE_DIR = TEMPLATE_DIR_DEFAULT
+TEMPLATE_DIR = _find_templates_dir()
 
 # 输出目录改为基于当前工作目录
 OUTPUT_DIR = Path.cwd() / "pic"
