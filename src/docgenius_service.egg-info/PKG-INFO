@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: docgenius-service
-Version: 2.0.2
+Version: 2.0.4
 Summary: 一个AI驱动的动态文档生成服务，可将文本转换为设计精美的图片。
 Author-email: DocGenius Team <contact@docgenius.com>
 License: MIT
@@ -26,6 +26,8 @@ Requires-Dist: fastmcp
 Requires-Dist: playwright
 Requires-Dist: python-frontmatter
 Requires-Dist: aiofiles
+Provides-Extra: browsers
+Requires-Dist: playwright; extra == "browsers"
 
 # DocGenius - AI驱动的动态文档生成服务
 
@@ -53,32 +55,100 @@ card-creator-mcp/
 └── README.md             # 项目文档
 ```
 
-## 🛠️ 安装依赖
+## 🛠️ 安装方式
 
-首先确保你已安装Python 3.10+，然后安装项目依赖：
+### 方式一：使用 uvx 直接运行（推荐）
+
+无需本地安装，直接运行最新版本：
 
 ```bash
-pip install -r requirements.txt
+# 直接运行服务
+uvx docgenius-service
+
+# 或使用简化命令
+uvx --from docgenius-service docgenius
 ```
 
-安装Playwright浏览器：
+### 方式二：pip 安装
 
 ```bash
-playwright install chromium
+# 安装到本地环境
+pip install docgenius-service
+
+# 运行服务
+docgenius-service
+# 或
+docgenius
 ```
 
-## 🏃‍♂️ 运行服务
+### 方式三：开发模式
 
-启动DocGenius MCP服务：
+如果你需要修改源码：
 
 ```bash
-python main_service.py
+git clone <repository-url>
+cd docgenius-service
+pip install -e .
+docgenius-service  # 首次运行会自动安装Chromium浏览器
 ```
 
-或使用FastMCP CLI：
+## ⚙️ 配置选项
 
-```bash
-fastmcp run main_service.py
+### 环境变量
+
+DocGenius 支持通过环境变量进行配置：
+
+- `DOCGENIUS_TEMPLATES_DIR`: 自定义模板文件夹路径（可选）
+
+**设置方式：**
+
+1. **使用 .env 文件（推荐）**：
+   ```bash
+   # 在当前目录创建 .env 文件
+   echo "DOCGENIUS_TEMPLATES_DIR=/path/to/your/templates" > .env
+   docgenius-service
+   ```
+
+2. **命令行设置**：
+   ```bash
+   # Windows PowerShell
+   $env:DOCGENIUS_TEMPLATES_DIR="D:\path\to\templates" ; docgenius-service
+   
+   # Linux/macOS
+   DOCGENIUS_TEMPLATES_DIR=/path/to/templates docgenius-service
+   ```
+
+### MCP 客户端配置
+
+如果你使用 MCP 客户端（如 Claude Desktop），可以在 `mcp.json` 中配置：
+
+```json
+{
+  "mcpServers": {
+    "docgenius": {
+      "command": "uvx",
+      "args": ["docgenius-service"],
+      "env": {
+        "DOCGENIUS_TEMPLATES_DIR": "/path/to/your/custom/templates"
+      }
+    }
+  }
+}
+```
+
+或者使用本地安装的版本：
+
+```json
+{
+  "mcpServers": {
+    "docgenius": {
+      "command": "docgenius-service",
+      "env": {
+        "DOCGENIUS_TEMPLATES_DIR": "/path/to/your/custom/templates"
+      }
+    }
+  }
+}
 ```
 
 ## 🎯 可用工具
@@ -96,17 +166,25 @@ fastmcp run main_service.py
 
 **返回**: 包含模板详细信息的字典
 
-### 3. create_image_from_html(html_content: str, template_name: str, file_name: str, width: int, height: int)
-将HTML内容渲染为图片并保存。
+### 3. save_html_file(html_content: str, template_name: str, file_name: str)
+将HTML内容保存为本地文件。
 
 **参数**:
 - `html_content`: HTML代码字符串
 - `template_name`: 使用的模板名称
 - `file_name`: 输出文件名（不含扩展名）
+
+**返回**: 保存的HTML文件的绝对路径
+
+### 4. create_image_from_html_file(html_file_path: str, width: int, height: int)
+读取本地HTML文件并将其渲染为JPG图片。
+
+**参数**:
+- `html_file_path`: HTML文件的路径
 - `width`: 图片宽度
 - `height`: 图片高度
 
-**返回**: 任务执行结果字符串
+**返回**: 生成的JPG图片文件的绝对路径
 
 ## 📋 模板格式
 
@@ -130,30 +208,62 @@ height: 600
 
 ## 📝 使用示例
 
-1. 列出可用模板：
-   ```python
-   templates = await client.call_tool("list_available_templates")
-   ```
+### 完整的工作流程
 
-2. 获取模板详情：
-   ```python
-   details = await client.call_tool("get_template_details", {"template_name": "resume"})
-   ```
+```python
+# 1. 列出可用模板
+templates = await client.call_tool("list_available_templates")
 
-3. 生成图片：
-   ```python
-   result = await client.call_tool("create_image_from_html", {
-       "html_content": "<html>...</html>",
-       "template_name": "resume",
-       "file_name": "my_resume",
-       "width": 827,
-       "height": 1169
-   })
-   ```
+# 2. 获取模板详情
+details = await client.call_tool("get_template_details", {"template_name": "resume"})
+
+# 3. 保存HTML文件
+html_path = await client.call_tool("save_html_file", {
+    "html_content": "<html>...</html>",
+    "template_name": "resume", 
+    "file_name": "my_resume"
+})
+
+# 4. 生成图片
+image_path = await client.call_tool("create_image_from_html_file", {
+    "html_file_path": html_path,
+    "width": 827,
+    "height": 1169
+})
+```
+
+### 快速测试
+
+运行服务后，文件将保存在当前工作目录的 `pic/` 文件夹中，按模板类型自动分类：
+
+```
+当前目录/
+├── pic/
+│   ├── resume/
+│   │   ├── my_resume.html
+│   │   └── my_resume.jpg
+│   └── knowledge_card/
+│       ├── my_card.html
+│       └── my_card.jpg
+```
 
 ## 🚧 开发状态
 
-该项目目前处于1.1版本，包含核心功能实现。未来计划增加更多模板类型和自定义选项。
+该项目目前处于 **2.0.3** 版本，具备以下特性：
+
+- ✅ 支持 `uvx` 一键运行
+- ✅ 智能模板路径解析
+- ✅ 环境变量配置支持
+- ✅ 分离式工具设计（HTML保存 + 图片生成）
+- ✅ 完整的 MCP 客户端配置支持
+- ✅ 跨平台兼容（Windows/Linux/macOS）
+- ✅ **自动安装 Playwright 浏览器**（新功能）
+
+**更新日志：**
+- v2.0.3: 🎉 **自动安装 Playwright 浏览器** - 首次运行自动检测并安装 Chromium，显著改善用户体验
+- v2.0.2: 修复 uvx 运行问题，包含模板文件
+- v2.0.1: 添加 docgenius-service 命令支持  
+- v2.0.0: 重构为标准 Python 包，支持 uvx 分发
 
 ## 📄 许可证
 

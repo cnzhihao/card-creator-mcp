@@ -178,13 +178,68 @@ def main():
         print("请确保 'templates' 文件夹与 'src' 文件夹在同一级目录下。")
         sys.exit(1)
     
-    # 获取并打印 Playwright 的版本信息，以帮助调试
-    try:
-        from playwright import __version__ as pw_version
-        print(f"INFO: Playwright version: {pw_version}")
-    except ImportError:
-        print("WARNING: Playwright is not installed.")
+    # 自动安装和检查 Playwright 浏览器
+    _ensure_playwright_browsers()
 
     mcp.run()
+
+def _ensure_playwright_browsers():
+    """确保 Playwright 浏览器已安装。"""
+    import subprocess
+    
+    # 首先尝试安装 playwright（如果需要的话）
+    try:
+        # 尝试导入 playwright
+        from playwright import __version__ as pw_version
+        print(f"✅ Playwright version: {pw_version}")
+        playwright_available = True
+    except ImportError:
+        print("📦 检测到 Playwright 未安装，正在尝试安装...")
+        playwright_available = False
+        
+        # 尝试使用 pip 安装 playwright
+        try:
+            install_playwright = subprocess.run(
+                [sys.executable, "-m", "pip", "install", "playwright"], 
+                capture_output=True, text=True, timeout=60
+            )
+            if install_playwright.returncode == 0:
+                print("✅ Playwright 安装成功！")
+                try:
+                    from playwright import __version__ as pw_version
+                    print(f"✅ Playwright version: {pw_version}")
+                    playwright_available = True
+                except ImportError:
+                    print("⚠️  Playwright 安装后仍无法导入，将继续尝试...")
+            else:
+                print(f"❌ Playwright 安装失败: {install_playwright.stderr}")
+        except subprocess.TimeoutExpired:
+            print("⚠️  Playwright 安装超时")
+        except Exception as e:
+            print(f"⚠️  Playwright 安装异常: {e}")
+    
+    # 如果 playwright 可用，检查并安装浏览器
+    if playwright_available:
+        try:
+            # 检查浏览器是否已安装
+            result = subprocess.run([sys.executable, "-m", "playwright", "install", "--dry-run", "chromium"], 
+                                  capture_output=True, text=True, timeout=10)
+            if "chromium" in result.stdout and "is already installed" not in result.stdout:
+                print("📥 正在安装 Chromium 浏览器（首次运行需要）...")
+                install_result = subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"], 
+                                             capture_output=True, text=True, timeout=120)
+                if install_result.returncode == 0:
+                    print("✅ Chromium 浏览器安装完成！")
+                else:
+                    print(f"⚠️  Chromium 安装警告: {install_result.stderr}")
+            else:
+                print("✅ Chromium 浏览器已就绪")
+        except subprocess.TimeoutExpired:
+            print("⚠️  浏览器检查超时，将继续启动服务")
+        except Exception as e:
+            print(f"⚠️  浏览器检查失败: {e}，将继续启动服务")
+    else:
+        print("⚠️  无法确保 Playwright 可用，服务可能无法正常生成图片")
+        print("💡 请手动运行: pip install playwright && playwright install chromium")
 
 # 备注：原有的 if __name__ == "__main__": mcp.run() 语句已被移除 

@@ -58,8 +58,7 @@ docgenius
 git clone <repository-url>
 cd docgenius-service
 pip install -e .
-playwright install chromium  # 首次安装需要
-docgenius-service
+docgenius-service  # 首次运行会自动安装Chromium浏览器
 ```
 
 ## ⚙️ 配置选项
@@ -219,7 +218,7 @@ image_path = await client.call_tool("create_image_from_html_file", {
 
 ## 🚧 开发状态
 
-该项目目前处于 **2.0.2** 版本，具备以下特性：
+该项目目前处于 **2.0.3** 版本，具备以下特性：
 
 - ✅ 支持 `uvx` 一键运行
 - ✅ 智能模板路径解析
@@ -227,8 +226,10 @@ image_path = await client.call_tool("create_image_from_html_file", {
 - ✅ 分离式工具设计（HTML保存 + 图片生成）
 - ✅ 完整的 MCP 客户端配置支持
 - ✅ 跨平台兼容（Windows/Linux/macOS）
+- ✅ **自动安装 Playwright 浏览器**（新功能）
 
 **更新日志：**
+- v2.0.3: 🎉 **自动安装 Playwright 浏览器** - 首次运行自动检测并安装 Chromium，显著改善用户体验
 - v2.0.2: 修复 uvx 运行问题，包含模板文件
 - v2.0.1: 添加 docgenius-service 命令支持  
 - v2.0.0: 重构为标准 Python 包，支持 uvx 分发
